@@ -1,0 +1,132 @@
+from abc import ABC, abstractmethod
+
+# Abstract class for books
+class Book(ABC):
+    def __init__(self, title, author, genre, price):
+        self.__title = title  # Encapsulation: private attributes
+        self.__author = author
+        self.__genre = genre
+        self.__price = price
+
+    # Abstract methods
+    @abstractmethod
+    def calculate_loan_fee(self):
+        pass
+
+    @abstractmethod
+    def get_summary(self):
+        pass
+
+    # Getters and setters for encapsulated attributes
+    @property
+    def title(self):
+        return self.__title
+
+    @property
+    def author(self):
+        return self.__author
+
+    @property
+    def genre(self):
+        return self.__genre
+
+    @property
+    def price(self):
+        return self.__price
+
+    @price.setter
+    def price(self, value):
+        if value > 0:
+            self.__price = value
+        else:
+            raise ValueError("Price must be positive.")
+
+# FictionBook class inheriting from Book
+class FictionBook(Book):
+    def __init__(self, title, author, genre, price, sub_genre):
+        super().__init__(title, author, genre, price)
+        self.sub_genre = sub_genre
+
+    def calculate_loan_fee(self):
+        return self.price * 0.1  # 10% of the price as loan fee
+
+    def get_summary(self):
+        return (f"Fiction Book: {self.title} by {self.author}, Genre: {self.genre} ({self.sub_genre}), "
+                f"Price: ${self.price}")
+
+# TextBook class inheriting from Book
+class TextBook(Book):
+    def __init__(self, title, author, genre, price, edition):
+        super().__init__(title, author, genre, price)
+        self.edition = edition
+
+    def calculate_loan_fee(self):
+        return self.price * 0.2  # 20% of the price as loan fee
+
+    def get_summary(self):
+        return (f"TextBook: {self.title} by {self.author}, Genre: {self.genre}, Edition: {self.edition}, "
+                f"Price: ${self.price}")
+
+# Library Management System
+class Library:
+    def __init__(self, name):
+        self.name = name
+        self.books = []  # List to store books in the library
+
+    def add_book(self, book):
+        if isinstance(book, Book):  # Polymorphism: accept any object derived from Book
+            self.books.append(book)
+            print(f"Book '{book.title}' added to the library.")
+        else:
+            print("Invalid book type.")
+
+    def display_books(self):
+        if not self.books:
+            print("No books available in the library.")
+        else:
+            for book in self.books:
+                print(book.get_summary())
+
+    def loan_book(self, title):
+        for book in self.books:
+            if book.title == title:
+                loan_fee = book.calculate_loan_fee()
+                print(f"Book '{title}' loaned. Loan fee: ${loan_fee:.2f}")
+                self.books.remove(book)
+                return
+        print(f"Book '{title}' not found in the library.")
+
+    def return_book(self, book):
+        self.add_book(book)
+
+# Example usage
+if __name__ == "__main__":
+    library = Library("Central Library")
+
+    # Create books
+    fiction = FictionBook("The Great Adventure", "Jack London", "Adventure", 20.00, "Classic")
+    textbook = TextBook("Physics Fundamentals", "Isaac Newton", "Science", 35.00, "2nd Edition")
+
+    # Add books to library
+    library.add_book(fiction)
+    library.add_book(textbook)
+
+    # Display books
+    print("\nAvailable books:")
+    library.display_books()
+
+    # Loan a book
+    print("\nLoan a book:")
+    library.loan_book("The Great Adventure")
+
+    # Display books after loaning
+    print("\nAvailable books after loaning:")
+    library.display_books()
+
+    # Return a book
+    print("\nReturn a book:")
+    library.return_book(fiction)
+
+    # Display books after returning
+    print("\nAvailable books after returning:")
+    library.display_books()
